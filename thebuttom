@@ -1,0 +1,101 @@
+blueprint:
+  name: Fibaro The Button (Z-Wave JS)
+  description: 'Create automations for The Button by Fibaro using the Z-Wave JS integration.
+
+    '
+  domain: automation
+  input:
+    fibaro_thebutton:
+      name: Fibaro The Button
+      description: List of available The Button devices.
+      selector:
+        device:
+          integration: zwave_js
+          manufacturer: Fibargroup
+          model: FGPB-101
+    key_pressed_1x:
+      name: Pressed Once
+      description: Action to run when button is pressed once.
+      default: []
+      selector:
+        action: {}
+    key_pressed_2x:
+      name: Pressed Twice
+      description: Action to run when button is pressed twice.
+      default: []
+      selector:
+        action: {}
+    key_pressed_3x:
+      name: Pressed Three Times
+      description: Action to run when button is pressed three times.
+      default: []
+      selector:
+        action: {}
+    key_pressed_4x:
+      name: Pressed Four Times
+      description: Action to run when button is pressed four times.
+      default: []
+      selector:
+        action: {}
+    key_pressed_5x:
+      name: Pressed Five Times
+      description: Action to run when button is pressed five times.
+      default: []
+      selector:
+        action: {}
+    key_held_down:
+      name: Held Down
+      description: Action to run when button is held down.
+      default: []
+      selector:
+        action: {}
+    key_released:
+      name: Released
+      description: Action to run when button is released after being held down.
+      default: []
+      selector:
+        action: {}
+  source_url: https://community.home-assistant.io/t/zwave-js-fibaro-the-button-fgpb-101-all-scenes/329260
+mode: single
+max_exceeded: silent
+variables:
+  device_id: !input 'fibaro_thebutton'
+trigger:
+- platform: event
+  event_type: zwave_js_value_notification
+condition: '{{ trigger.event.data.device_id == device_id }}'
+action:
+- variables:
+    property_key_name: '{{ trigger.event.data.property_key_name }}'
+    property_name: '{{ trigger.event.data.property_name }}'
+    label: '{{ trigger.event.data.label }}'
+    command_class_name: '{{ trigger.event.data.command_class_name }}'
+    value: '{{ trigger.event.data.value }}'
+    node_id: '{{ trigger.event.data.node_id }}'
+- service: logbook.log
+  data:
+    name: Z-Wave JS
+    message: 'received event from node {{node_id}}: {{ command_class_name }} - {{
+      value }} - {{ label }}'
+- choose:
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyPressed' }}\n"
+    sequence: !input 'key_pressed_1x'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyPressed2x' \n}}\n"
+    sequence: !input 'key_pressed_2x'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyPressed3x' \n}}\n"
+    sequence: !input 'key_pressed_3x'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyPressed4x' \n}}\n"
+    sequence: !input 'key_pressed_4x'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyPressed5x' \n}}\n"
+    sequence: !input 'key_pressed_5x'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyHeldDown' \n}}\n"
+    sequence: !input 'key_held_down'
+  - conditions: "{{  property_name == 'scene' \n    and property_key_name == '001'\n\
+      \    and value == 'KeyReleased' \n}}\n"
+    sequence: !input 'key_released'
